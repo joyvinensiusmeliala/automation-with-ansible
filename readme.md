@@ -765,3 +765,5 @@ deb-src http://mariadb.mirror.globo.tech/repo/10.9/ubuntu jammy main
 ```zsh
 ansible-playbook -i inventory quiz-3_j2template.yml -u student -v
 ```
+
+## Lab 5.1 : Managing Roles 
