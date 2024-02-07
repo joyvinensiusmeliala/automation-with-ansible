@@ -55,7 +55,7 @@ ansible --version
 **Setup default configuration ansible.**
 ```zsh
 sudo mkdir -p /etc/ansible
-sudo vim /etc/ansible/hosts
+sudo nano /etc/ansible/hosts
 ```
 ```
 ...
@@ -136,7 +136,7 @@ cd managing-inventory
 
 2. Create an inventory file in the working directory. Use the Server Inventory Specifications table as a guide. In addition, create a new group called Indonesia from the combined location group and add pod-joyvinensius-contoller as ungrouped host.
 ```zsh
-vim inventory
+nano inventory
 ```
 ```
 pod-joyvinensius-controller
@@ -203,7 +203,7 @@ cd deploy-review
 
 **Create ansible configuration.**
 ```zsh
-vim ansible.cfg
+nano ansible.cfg
 ```
 ```
 ...
@@ -216,7 +216,7 @@ host_key_checking = False
 
 **Create inventory.**
 ```zsh
-vim inventory
+nano inventory
 ```
 ```
 ...
@@ -248,7 +248,7 @@ cd playbook-basic
 
 **Create ansible configuration.**
 ```zsh
-vim ansible.cfg
+nano ansible.cfg
 ```
 ```
 ...
@@ -260,7 +260,7 @@ remote_user = student
 
 **Create inventory.**
 ```zsh
-vim inventory
+nano inventory
 ```
 ```
 ...
@@ -274,7 +274,7 @@ pod-joyvinensius-managed1
 echo "This is a test page." > files/index.html
 ```
 ```zsh
-vim site.yml
+nano site.yml
 ```
 ```
 ...
@@ -322,7 +322,7 @@ cd data-variables/
 
 **Create ansible local configuration.**
 ```zsh
-vim ansible.cfg
+nano ansible.cfg
 ```
 ```
 ...
@@ -335,7 +335,7 @@ host_key_checking = False
 
 **Create an inventory.**
 ```zsh
-vim inventory
+nano inventory
 ```
 
 ```
@@ -346,7 +346,7 @@ pod-joyvinensius-managed2
 
 **Create playbook.**
 ```zsh
-vim playbook.yml
+nano playbook.yml
 ```
 ```
 ...
@@ -410,7 +410,7 @@ cd jinja2-template
 
 **Create inventory.**
 ```zsh
-vim inventory
+nano inventory
 ```
 
 ```
@@ -422,7 +422,7 @@ pod-joyvinensius-managed1
 
 **Create playbook.**
 ```zsh
-vim site.yml
+nano site.yml
 ```
 
 ```
@@ -449,7 +449,7 @@ vim site.yml
 
 **Create Jinja 2 template.**
 ```zsh
-vim joyvinensius.html.j2
+nano joyvinensius.html.j2
 ```
 ```
 ...
@@ -495,7 +495,7 @@ cd quiz-001-1
 
 **Create ansible configuration.**
 ```zsh
-vim ansible.cfg
+nano ansible.cfg
 ```
 ```
 [defaults]
@@ -505,7 +505,7 @@ remote_user = student
 
 **Create inventory.**
 ```zsh
-vim inventory
+nano inventory
 ```
 ```
 [webserver]
@@ -514,7 +514,7 @@ pod-joyvinensius-managed2
 
 **Create playbook.**
 ```zsh
-vim quiz-1-1_playbook.yml
+nano quiz-1-1_playbook.yml
 ```
 ```
 ...
@@ -606,7 +606,7 @@ cd quiz-001-2
 
 **Create ansible configuration.**
 ```zsh
-vim ansible.cfg
+nano ansible.cfg
 ```
 ```
 [defaults]
@@ -616,7 +616,7 @@ remote_user = student
 
 **Create inventory.**
 ```zsh
-vim inventory
+nano inventory
 ```
 ```
 [target]
@@ -625,7 +625,7 @@ pod-joyvinensius-managed2
 
 **Create playbook.**
 ```zsh
-vim quiz-1-2_variables.yml
+nano quiz-1-2_variables.yml
 ```
 ```
 - name: Quiz Playbook
@@ -701,7 +701,7 @@ cd quiz-001-3
 
 **Create inventory.**
 ```zsh
-vim inventory
+nano inventory
 ```
 ```
 [webservers]
@@ -710,64 +710,58 @@ pod-joyvinensius-managed[1:2]
 
 **Create Playbook.**
 ```zsh
-vim quiz-1-3_j2template.yml
+nano quiz-3_j2template.yml
 ```
 ```
-- name: Quiz Jinja 2
-  hosts: all
+---
+- name: Install Nginx and MariaDB
+  hosts: webservers
   become: true
-  vars:
-    required_pkg:
-      - nginx=1.23.1-1~jammy
-      - mariadb-server-10.9
-      - mariadb-client-10.9
   tasks:
-    - name: copy MariaDB Repo
-      template: src=mariadb.list.j2 dest=/etc/apt/sources.list.d/mariadb.list
-    - name: copy Nginx Repo
-      template: src=nginx.list.j2 dest=/etc/apt/sources.list.d/nginx.list
-    - name: Install GPG Key for Nginx Repo
-      shell: curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
-    - name: Install GPG Key for MariaDB Repo
-      shell: sudo curl -o /etc/apt/trusted.gpg.d/mariadb_release_signing_key.asc 'https://mariadb.org/mariadb_release_signing_key.asc'
-    - name: Update Repo
+    - name: Install Nginx
       apt:
-        update_cache: true
-        force_apt_get: true
-    - name: Install Required Package
+        deb: http://nginx.org/packages/mainline/ubuntu/pool/nginx/n/nginx/nginx_1.23.1-1~jammy_amd64.deb
+        state: present
+
+    - name: Start Nginx
+      systemd:
+        name: nginx
+        state: started
+
+    - name: Install MariaDB
       apt:
-        update_cache: yes
-        force_apt_get: yes
-        name: "{{required_pkg}}"
-        state: latest
-    - name: The Nginx service is started and enabled
-      service: name=nginx state=started enabled=true
-    - name: The MariaDB Server is started and enabled
-      service: name=mariadb state=started enabled=true
+        name: mariadb-server,mariadb-client
+        state: present
+
+    - name: Start MariaDB
+      systemd:
+        name: mariadb
+        state: started
 ```
 
 **Create Jinja2 Template**
 ```zsh
-vim nginx.list.j2
+nano nginx.list.j2
 ```
 ```
 ...
-deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/mainline/ubuntu jammy nginx
-deb-src [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/mainline/ubuntu jammy nginx
+# Nginx Repository
+deb http://nginx.org/packages/mainline/ubuntu jammy nginx
+deb-src http://nginx.org/packages/mainline/ubuntu jammy nginx
 ...
 ```
 ```zsh
-vim mariadb.list.j2
+nano mariadb.list.j2
 ```
 ```
 ...
-deb https://mirrors.aliyun.com/mariadb/repo/10.9/ubuntu jammy main
-deb-src https://mirrors.aliyun.com/mariadb/repo/10.9/ubuntu jammy main
+# MariaDB Repository
+deb [arch=amd64] http://mariadb.mirror.globo.tech/repo/10.9/ubuntu jammy main
+deb-src http://mariadb.mirror.globo.tech/repo/10.9/ubuntu jammy main
 ...
 ```
 
 **Running playbook.**
 ```zsh
-ansible-playbook --syntax-check quiz-1-3_j2template.yml
-ansible-playbook quiz-1-3_j2template.yml
+ansible-playbook -i inventory quiz-3_j2template.yml -u student -v
 ```
